@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LabWatch - Homelab Command Center</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta http-equiv="refresh" content="60">
+</head>
+<body>
+
+    <header>
+        <h1>LabWatch</h1>
+        <p>Homelab Command Center</p>
+        <p class="last-checked">Last checked: {{ last_checked }}</p>
+    </header>
+
+    <section class="summary">
+        <div class="summary-card">
+            <h2>{{ total_services }}</h2>
+            <p>Total Services</p>
+        </div>
+
+        <div class="summary-card online">
+            <h2>{{ online_count }}</h2>
+            <p>Online</p>
+        </div>
+
+        <div class="summary-card warning">
+            <h2>{{ warning_count }}</h2>
+            <p>Warnings</p>
+        </div>
+
+        <div class="summary-card offline">
+            <h2>{{ offline_count }}</h2>
+            <p>Offline</p>
+        </div>
+    </section>
+
+    <main class="grid">
+        {% for service in services %}
+        <div class="card {{ service.overall_status | lower }}">
+            <div class="card-header">
+                <h2>{{ service.name }}</h2>
+                <span class="badge">{{ service.overall_status }}</span>
+            </div>
+
+            <p><strong>Category:</strong> {{ service.category }}</p>
+            <p><strong>Host:</strong> {{ service.host }}</p>
+            <p><strong>IP:</strong> {{ service.ip_address }}</p>
+            <p><strong>Port:</strong> {{ service.port }} - {{ service.port_status }}</p>
+            <p><strong>DNS:</strong> {{ service.dns_status }}</p>
+            <p><strong>HTTP:</strong> {{ service.http_status }}</p>
+            <p><strong>Status Note:</strong> {{ service.status_note }}</p>
+
+            <a href="{{ service.url }}" target="_blank">Open Service</a>
+        </div>
+        {% endfor %}
+    </main>
+
+</body>
+</html>

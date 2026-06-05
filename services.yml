@@ -1,0 +1,54 @@
+services:
+  - name: Grafana
+    url: http://grafana.homelab.local
+    host: grafana.homelab.local
+    port: 80
+    category: Monitoring
+
+  - name: Prometheus
+    url: http://192.168.10.60:9090
+    host: 192.168.10.60
+    port: 9090
+    category: Monitoring
+
+  - name: Alertmanager
+    url: http://192.168.10.60:9093
+    host: 192.168.10.60
+    port: 9093
+    category: Monitoring
+
+  - name: kube-state-metrics
+    url: http://192.168.10.82:30080
+    host: 192.168.10.82
+    port: 30080
+    category: Kubernetes
+
+  - name: Nginx Proxy Manager
+    url: http://npm.homelab.local
+    host: npm.homelab.local
+    port: 80
+    category: Reverse Proxy
+
+  - name: Keycloak
+    url: http://keycloak.homelab.local
+    host: keycloak.homelab.local
+    port: 80
+    category: Identity
+
+  - name: Wazuh
+    url: https://wazuh.homelab.local
+    host: wazuh.homelab.local
+    port: 443
+    category: Security
+
+  - name: Proxmox
+    url: https://192.168.10.20:8006
+    host: 192.168.10.20
+    port: 8006
+    category: Virtualization
+
+  - name: OPNsense
+    url: https://192.168.10.1
+    host: 192.168.10.1
+    port: 443
+    category: Firewall

@@ -1,0 +1,145 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: #f9fafb;
+}
+
+header {
+    text-align: center;
+    padding: 30px;
+    background: #030712;
+    border-bottom: 1px solid #374151;
+}
+
+header h1 {
+    font-size: 42px;
+    margin: 0;
+}
+
+header p {
+    margin: 8px 0;
+    color: #d1d5db;
+}
+
+.last-checked {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 20px;
+}
+
+.summary-card {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.summary-card h2 {
+    font-size: 32px;
+    margin: 0;
+}
+
+.summary-card p {
+    color: #d1d5db;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 18px;
+    padding: 20px;
+}
+
+.card {
+    background: #1f2937;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #374151;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card h2 {
+    margin-top: 0;
+}
+
+.card p {
+    color: #d1d5db;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.card p strong {
+    color: #ffffff;
+}
+
+.card {
+    min-height: 300px;
+}
+
+.card a {
+    display: inline-block;
+    margin-top: 10px;
+    color: #ffffff;
+    background: #2563eb;
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+.card a:hover {
+    background: #1d4ed8;
+}
+
+.badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.online {
+    border-color: #22c55e;
+}
+
+.warning {
+    border-color: #eab308;
+}
+
+.offline {
+    border-color: #ef4444;
+}
+
+.card.online .badge,
+.summary-card.online {
+    background: #14532d;
+}
+
+.card.warning .badge,
+.summary-card.warning {
+    background: #713f12;
+}
+
+.card.offline .badge,
+.summary-card.offline {
+    background: #7f1d1d;
+}
+
+@media (max-width: 800px) {
+    .summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

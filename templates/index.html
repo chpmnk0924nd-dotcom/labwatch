@@ -9,9 +9,31 @@
 
     <header>
         <h1>LabWatch</h1>
-        <p>Homelab Command Center</p>
-        <p class="last-checked">Last checked: {{ last_checked }}</p>
+    <p>Homelab Command Center</p>
+    <p class="last-checked">Last checked: {{ last_checked }}</p>
+
+    <div class="health-section">
+        <div class="health-label">
+            <span>Overall Health</span>
+            <span>{{ health_percent }}%</span>
+        </div>
+
+        <div class="health-bar">
+        <div class="health-fill {{ health_status }}" style="width: {{ health_percent }}%;"></div>
+        </div>
     </header>
+
+    <section class="network-map">
+    <div>🌎 Internet</div>
+    <span>→</span>
+    <div>🔥 OPNsense</div>
+    <span>→</span>
+    <div>🔀 Switch</div>
+    <span>→</span>
+    <div>🖥️ Proxmox</div>
+    <span>→</span>
+    <div>📊 Services</div>
+</section>
 
     <section class="summary">
         <div class="summary-card">

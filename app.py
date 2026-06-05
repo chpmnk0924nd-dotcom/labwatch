@@ -109,6 +109,17 @@ def dashboard():
     online_count = sum(1 for service in checked_services if service["overall_status"] == "Online")
     warning_count = sum(1 for service in checked_services if service["overall_status"] == "Warning")
     offline_count = sum(1 for service in checked_services if service["overall_status"] == "Offline")
+    if total_services > 0:
+       health_percent = round((online_count / total_services) * 100)
+    else:
+       health_percent = 0
+
+    if health_percent >= 90:
+       health_status = "good"
+    elif health_percent >= 70:
+       health_status = "warning"
+    else:
+       health_status = "critical"
 
     return render_template(
         "index.html",
@@ -117,6 +128,8 @@ def dashboard():
         online_count=online_count,
         warning_count=warning_count,
         offline_count=offline_count,
+        health_percent=health_percent,
+        health_status=health_status,
         last_checked=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     )
 

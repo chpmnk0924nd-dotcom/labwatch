@@ -52,3 +52,15 @@ services:
     host: 192.168.10.1
     port: 443
     category: Firewall
+
+  - name: FreeBSD SSH
+    url: ssh://192.168.10.100
+    host: 192.168.10.100
+    port: 22
+    category: Unix Server
+
+  - name: FreeBSD Web
+    url: http://192.168.10.100
+    host: 192.168.10.100
+    port: 80
+    category: Unix Server

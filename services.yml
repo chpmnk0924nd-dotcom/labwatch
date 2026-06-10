@@ -70,3 +70,63 @@ services:
     host: 192.168.10.100
     port: 5432
     category: Database
+
+  - name: LabWatch Security Page
+    url: http://192.168.10.50:5050/security
+    host: 192.168.10.50
+    port: 5050
+    category: Security  
+
+  - name: LabWatch History Page
+    url: http://192.168.10.50:5050/history
+    host: 192.168.10.50
+    port: 5050
+    category: Monitoring  
+
+  - name: LabWatch Incidents Page
+    url: http://192.168.10.50:5050/incidents
+    host: 192.168.10.50
+    port: 5050
+    category: Monitoring
+
+  - name: LabWatch Dashboard
+    url: http://192.168.10.50:5050
+    host: 192.168.10.50
+    port: 5050
+    category: Monitoring  
+
+  - name: Windows Server LDAP
+    url: ldap://192.168.10.11
+    host: 192.168.10.11
+    port: 389
+    category: Windows Server  
+
+  - name: Windows Server DNS
+    url: dns://192.168.10.11
+    host: 192.168.10.11
+    port: 53
+    category: Windows Server  
+
+  - name: Ubuntu Security Watch Host
+    url: ssh://192.168.10.60
+    host: 192.168.10.60
+    port: 22
+    category: Linux Server
+
+  - name: Ubuntu Desktop
+    url: ssh://192.168.10.61
+    host: 192.168.10.61
+    port: 22
+    category: Linux Desktop  
+
+  - name: NAS
+    url: http://192.168.10.30:40000
+    host: 192.168.10.30
+    port: 40000
+    category: Storage  
+
+  - name: Switch Management
+    url: http://192.168.10.102
+    host: 192.168.10.102
+    port: 80
+    category: Network  

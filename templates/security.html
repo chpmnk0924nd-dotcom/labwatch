@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LabWatch Security Watch</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="topology-bar">
+        <span class="topology-pill">🛡️ Security Watch</span>
+        <a class="nav-button" href="/">🏠 Dashboard</a>
+        <a class="nav-button" href="/history">📊 History</a>
+        <a class="nav-button" href="/incidents">🚨 Incidents</a>
+    </div>
+
+    <div class="page-header">
+        <h1>Security Watch Report</h1>
+        <p>Latest Security Watch report displayed inside LabWatch.</p>
+        <p><strong>Report path:</strong> {{ report.path }}</p>
+    </div>
+
+    <div class="security-report-container">
+        {% if report.found %}
+            <div class="security-status-card online">
+                Latest report loaded successfully.
+            </div>
+        {% else %}
+            <div class="security-status-card warning">
+                No report found or report could not be read.
+            </div>
+        {% endif %}
+
+        <pre class="security-report">{{ report.content }}</pre>
+    </div>
+
+</body>
+</html>

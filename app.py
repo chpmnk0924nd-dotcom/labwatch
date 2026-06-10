@@ -1,3 +1,4 @@
+from security_watch import get_latest_security_report
 from flask import Flask, render_template, send_from_directory
 from db import (
     save_service_check,
@@ -165,6 +166,12 @@ def history():
 def incidents():
     incident_history = get_recent_incidents(50)
     return render_template("incidents.html", incident_history=incident_history)
+
+
+@app.route("/security")
+def security():
+    report = get_latest_security_report()
+    return render_template("security.html", report=report)
 
 
 @app.route("/favicon_io/<path:filename>")

@@ -110,3 +110,23 @@ labwatch/
 
 └── .gitignore
 
+## PostgreSQL Service History
+
+LabWatch now stores service check history in a PostgreSQL database hosted on a FreeBSD VM. Each service check records the service name, status, host, port, category, URL, diagnostic note, and timestamp.
+
+### Components
+
+- LabWatch Flask app running on Windows
+- PostgreSQL 16 running on FreeBSD
+- FreeBSD VM IP: 192.168.10.100
+- Database: labwatch
+- Table: service_checks
+- History page: /history
+
+### Features
+
+- Live service dashboard
+- PostgreSQL-backed historical service checks
+- Dedicated `/history` page
+- Service categories and diagnostic notes
+- FreeBSD Web and PostgreSQL monitoring

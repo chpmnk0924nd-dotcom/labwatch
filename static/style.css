@@ -235,3 +235,46 @@ header p {
     border-radius: 999px;
     transition: width 0.5s ease;
 }
+.page-header {
+    padding: 24px;
+    color: #ffffff;
+}
+
+.page-header h1 {
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: #cbd5e1;
+}
+
+.history-container {
+    padding: 0 24px 24px 24px;
+    overflow-x: auto;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1e293b;
+    color: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.history-table th,
+.history-table td {
+    padding: 12px;
+    border-bottom: 1px solid #334155;
+    text-align: left;
+    font-size: 14px;
+}
+
+.history-table th {
+    background: #0f172a;
+    color: #93c5fd;
+}
+
+.history-table tr:hover {
+    background: #263449;
+}

@@ -1,11 +1,14 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
+from db import save_service_check, get_recent_service_checks
 import yaml
 import socket
 import requests
+from pathlib import Path
 from datetime import datetime
 from urllib.parse import urlparse
 
 app = Flask(__name__)
+FAVICON_DIR = Path(app.root_path) / "favicon_io"
 
 
 def load_services():
@@ -85,7 +88,7 @@ def check_service(service):
         overall_status = "Offline"
         status_note = "Hostname did not resolve. Check Windows Server DNS or the service hostname."
 
-    return {
+    checked_service = {
         "name": name,
         "url": url,
         "host": host,
@@ -96,8 +99,12 @@ def check_service(service):
         "port_status": port_result,
         "http_status": http_result["http_status"],
         "overall_status": overall_status,
-        "status_note": status_note
-    }
+        "status_note": status_note,
+}
+
+    save_service_check(checked_service)
+
+    return checked_service
 
 
 @app.route("/")
@@ -132,6 +139,17 @@ def dashboard():
         health_status=health_status,
         last_checked=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     )
+
+
+@app.route("/history")
+def history():
+    service_history = get_recent_service_checks(50)
+    return render_template("history.html", service_history=service_history)
+
+
+@app.route("/favicon_io/<path:filename>")
+def favicon(filename):
+    return send_from_directory(FAVICON_DIR, filename)
 
 
 if __name__ == "__main__":

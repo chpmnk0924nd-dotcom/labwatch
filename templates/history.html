@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LabWatch History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="topology-bar">
+        <span class="topology-pill">📊 LabWatch History</span>
+        <span class="topology-arrow">→</span>
+        <a class="topology-pill" href="/">🏠 Dashboard</a>
+    </div>
+
+    <div class="page-header">
+        <h1>Service Check History</h1>
+        <p>Recent service checks stored in PostgreSQL on FreeBSD.</p>
+    </div>
+
+    <div class="history-container">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>Category</th>
+                    <th>Checked At</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in service_history %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.service_name }}</td>
+                    <td>
+                        <span class="status-badge {{ item.status | lower }}">
+                            {{ item.status }}
+                        </span>
+                    </td>
+                    <td>{{ item.host }}</td>
+                    <td>{{ item.port }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.checked_at }}</td>
+                    <td>{{ item.status_note }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

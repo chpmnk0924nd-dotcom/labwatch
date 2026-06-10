@@ -100,3 +100,125 @@ def get_recent_service_checks(limit=50):
     except Exception as e:
         print(f"[DB ERROR] Could not fetch service history: {e}")
         return []
+
+def get_last_service_status(service_name):
+    """
+    Get the most recent saved status for a service.
+    """
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            SELECT status
+            FROM service_checks
+            WHERE service_name = %s
+            ORDER BY id DESC
+            LIMIT 1
+            """,
+            (service_name,)
+        )
+
+        row = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+        if row:
+            return row[0]
+
+        return None
+
+    except Exception as e:
+        print(f"[DB ERROR] Could not fetch last status for {service_name}: {e}")
+        return None
+
+def save_incident(service, old_status, new_status):
+    """
+    Save an incident when a service status changes.
+    """
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        note = f"{service.get('name')} changed from {old_status} to {new_status}. {service.get('status_note')}"
+
+        cur.execute(
+            """
+            INSERT INTO incidents
+            (service_name, old_status, new_status, host, port, category, note)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """,
+            (
+                service.get("name"),
+                old_status,
+                new_status,
+                service.get("host"),
+                service.get("port"),
+                service.get("category"),
+                note,
+            ),
+        )
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        print(f"[DB ERROR] Could not save incident: {e}")
+
+def get_recent_incidents(limit=50):
+    """
+    Get recent LabWatch incidents from PostgreSQL.
+    """
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute(
+            """
+            SELECT
+                id,
+                service_name,
+                old_status,
+                new_status,
+                host,
+                port,
+                category,
+                note,
+                created_at
+            FROM incidents
+            ORDER BY id DESC
+            LIMIT %s
+            """,
+            (limit,)
+        )
+
+        rows = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        incidents = []
+        for row in rows:
+            incidents.append({
+                "id": row[0],
+                "service_name": row[1],
+                "old_status": row[2],
+                "new_status": row[3],
+                "host": row[4],
+                "port": row[5],
+                "category": row[6],
+                "note": row[7],
+                "created_at": row[8],
+            })
+
+        return incidents
+
+    except Exception as e:
+        print(f"[DB ERROR] Could not fetch incidents: {e}")
+        return []

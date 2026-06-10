@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LabWatch Incidents</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="topology-bar">
+        <span class="topology-pill">🚨 LabWatch Incidents</span>
+        <a class="nav-button" href="/">🏠 Dashboard</a>
+        <a class="nav-button" href="/history">📊 History</a>
+    </div>
+
+    <div class="page-header">
+        <h1>Incident Timeline</h1>
+        <p>Status changes detected by LabWatch and stored in PostgreSQL.</p>
+    </div>
+
+    <div class="history-container">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Service</th>
+                    <th>Old Status</th>
+                    <th>New Status</th>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>Category</th>
+                    <th>Created At</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in incident_history %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.service_name }}</td>
+                    <td>
+                        <span class="status-badge {{ item.old_status | lower }}">
+                            {{ item.old_status }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge {{ item.new_status | lower }}">
+                            {{ item.new_status }}
+                        </span>
+                    </td>
+                    <td>{{ item.host }}</td>
+                    <td>{{ item.port }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.created_at }}</td>
+                    <td>{{ item.note }}</td>
+                </tr>
+                {% endfor %}
+
+                {% if incident_history|length == 0 %}
+                <tr>
+                    <td colspan="9">No incidents recorded yet. Status changes will appear here.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

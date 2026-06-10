@@ -1,5 +1,11 @@
 from flask import Flask, render_template, send_from_directory
-from db import save_service_check, get_recent_service_checks
+from db import (
+    save_service_check,
+    get_recent_service_checks,
+    get_last_service_status,
+    save_incident,
+    get_recent_incidents,
+)
 import yaml
 import socket
 import requests
@@ -102,6 +108,14 @@ def check_service(service):
         "status_note": status_note,
 }
 
+    last_status = get_last_service_status(name)
+    current_status = checked_service["overall_status"]
+    
+    print(f"[INCIDENT DEBUG] {name}: last={last_status}, current={current_status}")
+
+    if last_status is not None and last_status != current_status:
+        save_incident(checked_service, last_status, current_status)
+
     save_service_check(checked_service)
 
     return checked_service
@@ -145,6 +159,12 @@ def dashboard():
 def history():
     service_history = get_recent_service_checks(50)
     return render_template("history.html", service_history=service_history)
+
+
+@app.route("/incidents")
+def incidents():
+    incident_history = get_recent_incidents(50)
+    return render_template("incidents.html", incident_history=incident_history)
 
 
 @app.route("/favicon_io/<path:filename>")

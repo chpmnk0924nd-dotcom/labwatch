@@ -222,3 +222,80 @@ def get_recent_incidents(limit=50):
     except Exception as e:
         print(f"[DB ERROR] Could not fetch incidents: {e}")
         return []
+
+def create_maintenance_window(service_name, reason, end_time=None):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO maintenance_windows (service_name, reason, end_time, active)
+        VALUES (%s, %s, %s, TRUE)
+        """,
+        (service_name, reason, end_time),
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def get_active_maintenance_windows():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT id, service_name, reason, start_time, end_time, active, created_at
+        FROM maintenance_windows
+        WHERE active = TRUE
+        ORDER BY created_at DESC
+        """
+    )
+
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return rows
+
+
+def get_active_maintenance_for_service(service_name):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT id, service_name, reason, start_time, end_time, active, created_at
+        FROM maintenance_windows
+        WHERE service_name = %s
+          AND active = TRUE
+        ORDER BY created_at DESC
+        LIMIT 1
+        """,
+        (service_name,),
+    )
+
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    return row
+
+
+def end_maintenance_window(maintenance_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        UPDATE maintenance_windows
+        SET active = FALSE
+        WHERE id = %s
+        """,
+        (maintenance_id,),
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()

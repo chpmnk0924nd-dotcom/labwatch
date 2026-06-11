@@ -1,11 +1,15 @@
 from security_watch import get_latest_security_report
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, request, redirect
 from db import (
     save_service_check,
     get_recent_service_checks,
     get_last_service_status,
     save_incident,
     get_recent_incidents,
+    create_maintenance_window,
+    get_active_maintenance_windows,
+    get_active_maintenance_for_service,
+    end_maintenance_window,
 )
 import yaml
 import socket
@@ -107,12 +111,23 @@ def check_service(service):
         "http_status": http_result["http_status"],
         "overall_status": overall_status,
         "status_note": status_note,
-}
+    }
+
+    maintenance = get_active_maintenance_for_service(name)
+
+    if maintenance is not None:
+        checked_service["overall_status"] = "Maintenance"
+        checked_service["status"] = "Maintenance"
+        checked_service["status_note"] = f"Maintenance: {maintenance[2]}"
+        checked_service["maintenance_reason"] = maintenance[2]
+
+        save_service_check(checked_service)
+        return checked_service
 
     last_status = get_last_service_status(name)
     current_status = checked_service["overall_status"]
-    
-   # print(f"[INCIDENT DEBUG] {name}: last={last_status}, current={current_status}")
+
+    # print(f"[INCIDENT DEBUG] {name}: last={last_status}, current={current_status}")
 
     if last_status is not None and last_status != current_status:
         save_incident(checked_service, last_status, current_status)
@@ -182,6 +197,55 @@ def favicon(filename):
 @app.route("/health")
 def health():
     return "OK", 200
+
+
+@app.route("/maintenance")
+def maintenance():
+    active_maintenance = get_active_maintenance_windows()
+
+    service_names = []
+    try:
+        with open("services.yml", "r") as file:
+            data = yaml.safe_load(file) or {}
+
+            if isinstance(data, dict):
+                services = data.get("services", [])
+            elif isinstance(data, list):
+                services = data
+            else:
+                services = []
+
+            service_names = [
+                service.get("name")
+                for service in services
+                if isinstance(service, dict) and service.get("name")
+            ]
+    except Exception as e:
+        print(f"Error loading services.yml for maintenance page: {e}")
+        service_names = []
+
+    return render_template(
+        "maintenance.html",
+        active_maintenance=active_maintenance,
+        service_names=service_names,
+    )
+
+
+@app.route("/maintenance/add", methods=["POST"])
+def add_maintenance():
+    service_name = request.form.get("service_name")
+    reason = request.form.get("reason")
+
+    if service_name and reason:
+        create_maintenance_window(service_name, reason)
+
+    return redirect("/maintenance")
+
+
+@app.route("/maintenance/end/<int:maintenance_id>", methods=["POST"])
+def end_maintenance(maintenance_id):
+    end_maintenance_window(maintenance_id)
+    return redirect("/maintenance")
 
 
 if __name__ == "__main__":

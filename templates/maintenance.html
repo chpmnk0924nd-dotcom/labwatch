@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LabWatch Maintenance</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="topology-bar">
+        <span class="topology-pill">🛠️ LabWatch Maintenance</span>
+        <a class="nav-button" href="/">🏠 Dashboard</a>
+        <a class="nav-button" href="/history">📊 History</a>
+        <a class="nav-button" href="/incidents">🚨 Incidents</a>
+        <a class="nav-button" href="/security">🛡️ Security Watch</a>
+        <a class="nav-button" href="/maintenance">🛠️ Maintenance</a>
+    </div>
+
+    <div class="history-container">
+        <h1>Maintenance Mode</h1>
+        <p>Use this page to mark a service as planned maintenance instead of treating it as a normal outage.</p>
+
+        <h2>Start Maintenance</h2>
+
+        <form method="POST" action="/maintenance/add">
+            <label>Service</label><br>
+            <select name="service_name" required>
+                {% for service in service_names %}
+                <option value="{{ service }}">{{ service }}</option>
+                {% endfor %}
+            </select>
+
+            <br><br>
+
+            <label>Reason</label><br>
+            <input type="text" name="reason" placeholder="Example: Updating Wazuh dashboard" required style="width: 400px;">
+
+            <br><br>
+
+            <button class="nav-button" type="submit">Start Maintenance</button>
+        </form>
+
+        <h2>Active Maintenance</h2>
+
+        <table class="history-table">
+            <tr>
+                <th>ID</th>
+                <th>Service</th>
+                <th>Reason</th>
+                <th>Started</th>
+                <th>Action</th>
+            </tr>
+
+            {% for item in active_maintenance %}
+            <tr>
+                <td>{{ item[0] }}</td>
+                <td>{{ item[1] }}</td>
+                <td>{{ item[2] }}</td>
+                <td>{{ item[3] }}</td>
+                <td>
+                    <form method="POST" action="/maintenance/end/{{ item[0] }}">
+                        <button class="nav-button" type="submit">End</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+
+            {% if active_maintenance|length == 0 %}
+            <tr>
+                <td colspan="5">No active maintenance windows.</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+</body>
+</html>

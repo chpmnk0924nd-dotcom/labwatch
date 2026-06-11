@@ -112,7 +112,7 @@ def check_service(service):
     last_status = get_last_service_status(name)
     current_status = checked_service["overall_status"]
     
-    print(f"[INCIDENT DEBUG] {name}: last={last_status}, current={current_status}")
+   # print(f"[INCIDENT DEBUG] {name}: last={last_status}, current={current_status}")
 
     if last_status is not None and last_status != current_status:
         save_incident(checked_service, last_status, current_status)
@@ -179,6 +179,11 @@ def favicon(filename):
     return send_from_directory(FAVICON_DIR, filename)
 
 
+@app.route("/health")
+def health():
+    return "OK", 200
+
+
 if __name__ == "__main__":
     requests.packages.urllib3.disable_warnings()
-    app.run(host="0.0.0.0", port=5050, debug=True)
+    app.run(host="0.0.0.0", port=5050, debug=False)

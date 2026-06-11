@@ -89,8 +89,8 @@ services:
     port: 5050
     category: Monitoring
 
-  - name: LabWatch Dashboard
-    url: http://192.168.10.50:5050
+  - name: LabWatch Flask Health
+    url: http://192.168.10.50:5050/health
     host: 192.168.10.50
     port: 5050
     category: Monitoring  

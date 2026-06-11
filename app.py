@@ -10,6 +10,8 @@ from db import (
     get_active_maintenance_windows,
     get_active_maintenance_for_service,
     end_maintenance_window,
+    get_service_uptime,
+    get_reliability_summary,
 )
 import yaml
 import socket
@@ -140,16 +142,24 @@ def check_service(service):
 @app.route("/")
 def dashboard():
     services = load_services()
-    checked_services = [check_service(service) for service in services]
+    checked_services = []
+
+    for service in services:
+        checked_service = check_service(service)
+        checked_service["uptime_24h"] = get_service_uptime(checked_service["name"], 24)
+        checked_services.append(checked_service)
 
     total_services = len(checked_services)
     online_count = sum(1 for service in checked_services if service["overall_status"] == "Online")
     warning_count = sum(1 for service in checked_services if service["overall_status"] == "Warning")
     offline_count = sum(1 for service in checked_services if service["overall_status"] == "Offline")
-    if total_services > 0:
-       health_percent = round((online_count / total_services) * 100)
+    maintenance_count = sum(1 for service in checked_services if service["overall_status"] == "Maintenance")
+    active_services = total_services - maintenance_count
+
+    if active_services > 0:
+        health_percent = round((online_count / active_services) * 100)
     else:
-       health_percent = 0
+        health_percent = 100
 
     if health_percent >= 90:
        health_status = "good"
@@ -167,6 +177,7 @@ def dashboard():
         offline_count=offline_count,
         health_percent=health_percent,
         health_status=health_status,
+        maintenance_count=maintenance_count,
         last_checked=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     )
 
@@ -246,6 +257,18 @@ def add_maintenance():
 def end_maintenance(maintenance_id):
     end_maintenance_window(maintenance_id)
     return redirect("/maintenance")
+
+
+@app.route("/reliability")
+def reliability():
+    reliability_24h = get_reliability_summary(24)
+    reliability_7d = get_reliability_summary(168)
+
+    return render_template(
+        "reliability.html",
+        reliability_24h=reliability_24h,
+        reliability_7d=reliability_7d,
+    )
 
 
 if __name__ == "__main__":

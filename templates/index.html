@@ -42,6 +42,7 @@
     <a class="nav-button" href="/incidents">🚨 Incidents</a>
     <a class="nav-button" href="/security">🛡️ Security Watch</a>
     <a class="nav-button" href="/maintenance">🛠️ Maintenance</a>
+    <a class="nav-button" href="/reliability">📈 Reliability</a>
 </section>
 
     <section class="summary">
@@ -81,6 +82,11 @@
             <p><strong>DNS:</strong> {{ service.dns_status }}</p>
             <p><strong>HTTP:</strong> {{ service.http_status }}</p>
             <p><strong>Status Note:</strong> {{ service.status_note }}</p>
+            {% if service.uptime_24h.uptime_percent is not none %}
+            <p><strong>Uptime 24h:</strong> {{ service.uptime_24h.uptime_percent }}%</p>
+            {% else %}
+            <p><strong>Uptime 24h:</strong> Not enough data</p>
+            {% endif %}
 
             <a href="{{ service.url }}" target="_blank">Open Service</a>
         </div>

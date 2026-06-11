@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LabWatch Reliability</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="topology-bar">
+        <span class="topology-pill">📈 LabWatch Reliability</span>
+        <a class="nav-button" href="/">🏠 Dashboard</a>
+        <a class="nav-button" href="/history">📊 History</a>
+        <a class="nav-button" href="/incidents">🚨 Incidents</a>
+        <a class="nav-button" href="/security">🛡️ Security Watch</a>
+        <a class="nav-button" href="/maintenance">🛠️ Maintenance</a>
+    </div>
+
+    <div class="history-container">
+        <h1>Reliability Metrics</h1>
+        <p>Uptime is calculated from service check history. Maintenance checks are excluded from downtime calculations.</p>
+
+        <h2>Last 24 Hours</h2>
+
+        <table class="history-table">
+            <tr>
+                <th>Service</th>
+                <th>Uptime</th>
+                <th>Total Checks</th>
+                <th>Online</th>
+                <th>Problems</th>
+                <th>Maintenance</th>
+            </tr>
+
+            {% for service in reliability_24h %}
+            <tr>
+                <td>{{ service.service_name }}</td>
+                <td>{{ service.uptime_percent }}%</td>
+                <td>{{ service.total_checks }}</td>
+                <td>{{ service.online_checks }}</td>
+                <td>{{ service.problem_checks }}</td>
+                <td>{{ service.maintenance_checks }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Last 7 Days</h2>
+
+        <table class="history-table">
+            <tr>
+                <th>Service</th>
+                <th>Uptime</th>
+                <th>Total Checks</th>
+                <th>Online</th>
+                <th>Problems</th>
+                <th>Maintenance</th>
+            </tr>
+
+            {% for service in reliability_7d %}
+            <tr>
+                <td>{{ service.service_name }}</td>
+                <td>{{ service.uptime_percent }}%</td>
+                <td>{{ service.total_checks }}</td>
+                <td>{{ service.online_checks }}</td>
+                <td>{{ service.problem_checks }}</td>
+                <td>{{ service.maintenance_checks }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

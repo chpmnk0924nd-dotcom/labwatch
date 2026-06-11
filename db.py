@@ -299,3 +299,118 @@ def end_maintenance_window(maintenance_id):
     conn.commit()
     cur.close()
     conn.close()
+
+
+def get_service_uptime(service_name, hours=24):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT status
+        FROM service_checks
+        WHERE service_name = %s
+          AND checked_at >= NOW() - (%s || ' hours')::INTERVAL
+        """,
+        (service_name, hours),
+    )
+
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    total_checks = len(rows)
+
+    if total_checks == 0:
+        return {
+            "uptime_percent": None,
+            "total_checks": 0,
+            "online_checks": 0,
+            "problem_checks": 0,
+            "maintenance_checks": 0,
+        }
+
+    online_checks = 0
+    problem_checks = 0
+    maintenance_checks = 0
+
+    for row in rows:
+        status = row[0]
+
+        if status == "Online":
+            online_checks += 1
+        elif status == "Maintenance":
+            maintenance_checks += 1
+        else:
+            problem_checks += 1
+
+    counted_checks = total_checks - maintenance_checks
+
+    if counted_checks == 0:
+        uptime_percent = 100.0
+    else:
+        uptime_percent = round((online_checks / counted_checks) * 100, 1)
+
+    return {
+        "uptime_percent": uptime_percent,
+        "total_checks": total_checks,
+        "online_checks": online_checks,
+        "problem_checks": problem_checks,
+        "maintenance_checks": maintenance_checks,
+    }
+
+
+def get_reliability_summary(hours=24):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT service_name, status
+        FROM service_checks
+        WHERE checked_at >= NOW() - (%s || ' hours')::INTERVAL
+        ORDER BY service_name
+        """,
+        (hours,),
+    )
+
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    summary = {}
+
+    for service_name, status in rows:
+        if service_name not in summary:
+            summary[service_name] = {
+                "service_name": service_name,
+                "total_checks": 0,
+                "online_checks": 0,
+                "problem_checks": 0,
+                "maintenance_checks": 0,
+                "uptime_percent": None,
+            }
+
+        summary[service_name]["total_checks"] += 1
+
+        if status == "Online":
+            summary[service_name]["online_checks"] += 1
+        elif status == "Maintenance":
+            summary[service_name]["maintenance_checks"] += 1
+        else:
+            summary[service_name]["problem_checks"] += 1
+
+    for service in summary.values():
+        counted_checks = service["total_checks"] - service["maintenance_checks"]
+
+        if counted_checks == 0:
+            service["uptime_percent"] = 100.0
+        else:
+            service["uptime_percent"] = round(
+                (service["online_checks"] / counted_checks) * 100,
+                1,
+            )
+
+    return sorted(summary.values(), key=lambda item: item["service_name"])

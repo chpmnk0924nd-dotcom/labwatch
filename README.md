@@ -130,3 +130,27 @@ LabWatch now stores service check history in a PostgreSQL database hosted on a F
 - Dedicated `/history` page
 - Service categories and diagnostic notes
 - FreeBSD Web and PostgreSQL monitoring
+
+## LabWatch Homelab Command Center
+
+LabWatch is a Flask-based homelab monitoring dashboard that tracks service availability, incident history, service health, and security reports across my home lab environment.
+
+Current capabilities:
+- Monitors 21 services across Windows, Linux, FreeBSD, Proxmox, OPNsense, Kubernetes, storage, and network devices
+- Tracks service history in PostgreSQL
+- Records incidents when services change status
+- Displays automated Security Watch reports
+- Parses Nginx Proxy Manager access logs for source IPs, status codes, and web probe activity
+- Pulls security reports automatically from Ubuntu using SSH key authentication
+- Recovers after restart using scheduled tasks, cron, and service auto-start settings
+
+## Recovery Scenario: Hyper-V External Switch Failure
+
+After a restart, LabWatch showed degraded service health. DC01 could reach the gateway and other LAN devices, but the Windows host and DC01 could not communicate with each other. The issue was traced to a broken Hyper-V External Switch binding.
+
+Resolution:
+- Rebuilt the Hyper-V LAB-SWITCH external virtual switch
+- Reattached DC01 to the recreated switch
+- Confirmed host-to-VM communication
+- Verified Windows Server DNS and LDAP checks returned online
+- Restored LabWatch to 21/21 services online

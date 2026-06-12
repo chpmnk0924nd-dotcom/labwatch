@@ -92,6 +92,24 @@ Offline
 Maintenance
 ```
 
+### BackupWatch
+
+BackupWatch provides backup readiness visibility inside LabWatch. It reads backup targets from `backups.yml` and checks whether important files, exports, reports, and configuration files exist and are recent enough.
+
+Current BackupWatch checks include:
+
+- LabWatch project folder
+- Security Watch latest report
+- Scheduled task export for report pulling
+- Scheduled task export for LabWatch startup
+- README documentation
+- services.yml
+- backups.yml
+- app.py
+- db.py
+
+BackupWatch reports total backup checks, healthy backups, warnings, missing backups, file age, max allowed age, and backup notes.
+
 ---
 
 ### PostgreSQL Service History

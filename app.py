@@ -1,4 +1,5 @@
 from security_watch import get_latest_security_report
+from backup_watch import get_backup_status
 from flask import Flask, render_template, send_from_directory, request, redirect
 from db import (
     save_service_check,
@@ -269,6 +270,12 @@ def reliability():
         reliability_24h=reliability_24h,
         reliability_7d=reliability_7d,
     )
+
+
+@app.route("/backups")
+def backups():
+    backup_status = get_backup_status()
+    return render_template("backups.html", backup_status=backup_status)
 
 
 if __name__ == "__main__":

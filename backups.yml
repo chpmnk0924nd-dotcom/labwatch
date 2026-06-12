@@ -1,0 +1,28 @@
+backups:
+  - name: LabWatch Project Folder
+    category: Application
+    type: local_path
+    path: D:\Scripts\LabWatch
+    max_age_hours: 24
+    notes: Main LabWatch project folder on Windows host
+
+  - name: Security Watch Latest Report
+    category: Security
+    type: local_file
+    path: D:\Scripts\LabWatch\security_reports\latest_security_report.txt
+    max_age_hours: 2
+    notes: Latest Security Watch report pulled from Ubuntu server
+
+  - name: Scheduled Task Export - LabWatch Pull
+    category: Automation
+    type: local_file
+    path: D:\Scripts\LabWatch\docs\scheduled-task-labwatch-pull.xml
+    max_age_hours: 720
+    notes: Exported Windows Scheduled Task for pulling Security Watch reports
+
+  - name: Scheduled Task Export - Start LabWatch
+    category: Automation
+    type: local_file
+    path: D:\Scripts\LabWatch\docs\scheduled-task-start-labwatch.xml
+    max_age_hours: 720
+    notes: Exported Windows Scheduled Task for starting LabWatch

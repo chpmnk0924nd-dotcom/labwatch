@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LabWatch Backups</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="topology-bar">
+        <span class="topology-pill">💾 BackupWatch</span>
+        <a class="nav-button" href="/">🏠 Dashboard</a>
+        <a class="nav-button" href="/history">📊 History</a>
+        <a class="nav-button" href="/incidents">🚨 Incidents</a>
+        <a class="nav-button" href="/security">🛡️ Security Watch</a>
+        <a class="nav-button" href="/maintenance">🛠️ Maintenance</a>
+        <a class="nav-button" href="/reliability">📈 Reliability</a>
+    </div>
+
+    <header class="hero">
+        <h1>BackupWatch</h1>
+        <p>Backup readiness and recovery visibility for LabWatch and supporting automation.</p>
+        <p><strong>Last checked:</strong> {{ backup_status.last_checked }}</p>
+    </header>
+
+    <section class="summary-grid">
+        <div class="summary-card">
+            <h2>{{ backup_status.total }}</h2>
+            <p>Total Backup Checks</p>
+        </div>
+
+        <div class="summary-card online">
+            <h2>{{ backup_status.healthy }}</h2>
+            <p>Healthy</p>
+        </div>
+
+        <div class="summary-card warning">
+            <h2>{{ backup_status.warning }}</h2>
+            <p>Warnings</p>
+        </div>
+
+        <div class="summary-card offline">
+            <h2>{{ backup_status.missing }}</h2>
+            <p>Missing</p>
+        </div>
+    </section>
+
+    <main class="grid">
+        {% for backup in backup_status.backups %}
+        <div class="card {{ backup.status | lower }}">
+            <div class="card-header">
+                <h2>{{ backup.name }}</h2>
+                <span class="badge">{{ backup.status }}</span>
+            </div>
+
+            <p><strong>Category:</strong> {{ backup.category }}</p>
+            <p><strong>Type:</strong> {{ backup.type }}</p>
+            <p><strong>Path:</strong> {{ backup.path }}</p>
+            <p><strong>Exists:</strong> {{ backup.exists }}</p>
+
+            {% if backup.age_hours is not none %}
+            <p><strong>Age:</strong> {{ backup.age_hours }} hours</p>
+            {% else %}
+            <p><strong>Age:</strong> Unknown</p>
+            {% endif %}
+
+            <p><strong>Max Age:</strong> {{ backup.max_age_hours }} hours</p>
+            <p><strong>Status Note:</strong> {{ backup.status_note }}</p>
+            <p><strong>Notes:</strong> {{ backup.notes }}</p>
+        </div>
+        {% endfor %}
+    </main>
+</body>
+</html>

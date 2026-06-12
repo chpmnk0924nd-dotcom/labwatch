@@ -26,3 +26,38 @@ backups:
     path: D:\Scripts\LabWatch\docs\scheduled-task-start-labwatch.xml
     max_age_hours: 720
     notes: Exported Windows Scheduled Task for starting LabWatch
+
+  - name: LabWatch README Documentation
+    category: Documentation
+    type: local_file
+    path: D:\Scripts\LabWatch\README.md
+    max_age_hours: 720
+    notes: Main project documentation committed to GitHub
+
+  - name: LabWatch Services Config
+    category: Configuration
+    type: local_file
+    path: D:\Scripts\LabWatch\services.yml
+    max_age_hours: 168
+    notes: Main list of monitored services
+
+  - name: BackupWatch Config
+    category: Configuration
+    type: local_file
+    path: D:\Scripts\LabWatch\backups.yml
+    max_age_hours: 168
+    notes: BackupWatch backup check configuration
+
+  - name: LabWatch App Code
+    category: Application
+    type: local_file
+    path: D:\Scripts\LabWatch\app.py
+    max_age_hours: 168
+    notes: Main Flask application file
+
+  - name: LabWatch Database Code
+    category: Application
+    type: local_file
+    path: D:\Scripts\LabWatch\db.py
+    max_age_hours: 168
+    notes: PostgreSQL helper functions for history, incidents, maintenance, and reliability

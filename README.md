@@ -837,3 +837,31 @@ Ready for continued improvement
 ## Author
 
 Created by Nicholas Deno as part of a hands-on IT homelab and infrastructure portfolio project.
+
+## PostgreSQL Data Storage
+
+LabWatch stores operational data in PostgreSQL running on FreeBSD.
+
+### Service Check History
+
+![PostgreSQL service checks](screenshots/postgresql-service-checks.png)
+
+Each dashboard check records the service name, status, timestamp, host, port, category, URL, and status note.
+
+### Incident Timeline
+
+![PostgreSQL incidents](screenshots/postgresql-incidents.png)
+
+Status transitions are stored as incidents, including the previous state, new state, host, port, category, and diagnostic note.
+
+### Maintenance Windows
+
+![PostgreSQL maintenance windows](screenshots/postgresql-maintenance-windows.png)
+
+Planned maintenance is stored in PostgreSQL and used to suppress normal incident behavior and exclude maintenance from uptime calculations.
+
+### Historical Check Volume
+
+![PostgreSQL check counts](screenshots/postgresql-check-counts-by-service.png)
+
+This query summarizes the number of historical checks stored for each monitored service.

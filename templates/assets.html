@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PatchWatch Asset Inventory</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="topology-bar">
+        <span class="topology-pill">🖥️ PatchWatch Assets</span>
+
+        <a class="nav-button" href="/">🏠 Dashboard</a>
+        <a class="nav-button" href="/history">📊 History</a>
+        <a class="nav-button" href="/incidents">🚨 Incidents</a>
+        <a class="nav-button" href="/security">🛡️ Security Watch</a>
+        <a class="nav-button" href="/maintenance">🛠️ Maintenance</a>
+        <a class="nav-button" href="/reliability">📈 Reliability</a>
+        <a class="nav-button" href="/backups">💾 Backups</a>
+    </div>
+
+    <header class="hero">
+        <h1>PatchWatch Asset Inventory</h1>
+        <p>
+            Current operating system, patch, uptime, and disk information
+            collected from managed systems.
+        </p>
+    </header>
+
+    <section class="summary-grid">
+        <div class="summary-card">
+            <h2>{{ total_assets }}</h2>
+            <p>Total Assets</p>
+        </div>
+
+        <div class="summary-card online">
+            <h2>{{ current_count }}</h2>
+            <p>Current</p>
+        </div>
+
+        <div class="summary-card warning">
+            <h2>{{ updates_count }}</h2>
+            <p>Updates Available</p>
+        </div>
+
+        <div class="summary-card offline">
+            <h2>{{ security_updates_count }}</h2>
+            <p>Security Updates Required</p>
+        </div>
+    </section>
+
+    <main class="grid">
+
+        {% for asset in asset_inventory %}
+
+        {% if asset[11] == "Current" %}
+            {% set card_status = "online" %}
+        {% elif asset[11] == "Updates Available" %}
+            {% set card_status = "warning" %}
+        {% elif asset[11] == "Security Updates Required" %}
+            {% set card_status = "offline" %}
+        {% else %}
+            {% set card_status = "warning" %}
+        {% endif %}
+
+        <div class="card {{ card_status }}">
+
+            <div class="card-header">
+                <h2>{{ asset[1] }}</h2>
+                <span class="badge">{{ asset[11] }}</span>
+            </div>
+
+            <p><strong>IP Address:</strong> {{ asset[2] }}</p>
+
+            <p>
+                <strong>Operating System:</strong>
+                {{ asset[3] }}
+            </p>
+
+            <p>
+                <strong>OS Version:</strong>
+                {{ asset[4] }}
+            </p>
+
+            <p>
+                <strong>Pending Updates:</strong>
+                {{ asset[5] }}
+            </p>
+
+            <p>
+                <strong>Pending Security Updates:</strong>
+                {{ asset[6] }}
+            </p>
+
+            <p>
+                <strong>Last Boot:</strong>
+                {{ asset[7] }}
+            </p>
+
+            <p>
+                <strong>Uptime:</strong>
+                {{ asset[8] }} days
+            </p>
+
+            <p>
+                <strong>Disk Total:</strong>
+                {{ asset[9] }} GB
+            </p>
+
+            <p>
+                <strong>Disk Free:</strong>
+                {{ asset[10] }} GB
+            </p>
+
+            <p>
+                <strong>Scan Source:</strong>
+                {{ asset[12] }}
+            </p>
+
+            <p>
+                <strong>Last Scanned:</strong>
+                {{ asset[13] }}
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+        {% if asset_inventory|length == 0 %}
+        <div class="card warning">
+            <h2>No Assets Found</h2>
+            <p>No PatchWatch inventory records are currently stored.</p>
+        </div>
+        {% endif %}
+
+    </main>
+
+</body>
+</html>

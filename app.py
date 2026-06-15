@@ -13,6 +13,7 @@ from db import (
     end_maintenance_window,
     get_service_uptime,
     get_reliability_summary,
+    get_asset_inventory,
 )
 import yaml
 import socket
@@ -276,6 +277,37 @@ def reliability():
 def backups():
     backup_status = get_backup_status()
     return render_template("backups.html", backup_status=backup_status)
+
+
+@app.route("/assets")
+def assets():
+    asset_inventory = get_asset_inventory()
+
+    total_assets = len(asset_inventory)
+
+    current_count = sum(
+        1 for asset in asset_inventory
+        if asset[11] == "Current"
+    )
+
+    updates_count = sum(
+        1 for asset in asset_inventory
+        if asset[11] == "Updates Available"
+    )
+
+    security_updates_count = sum(
+        1 for asset in asset_inventory
+        if asset[11] == "Security Updates Required"
+    )
+
+    return render_template(
+        "assets.html",
+        asset_inventory=asset_inventory,
+        total_assets=total_assets,
+        current_count=current_count,
+        updates_count=updates_count,
+        security_updates_count=security_updates_count,
+    )
 
 
 if __name__ == "__main__":

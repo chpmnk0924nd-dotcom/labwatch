@@ -414,3 +414,37 @@ def get_reliability_summary(hours=24):
             )
 
     return sorted(summary.values(), key=lambda item: item["service_name"])
+
+
+def get_asset_inventory():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT
+            id,
+            hostname,
+            ip_address,
+            operating_system,
+            os_version,
+            pending_updates,
+            pending_security_updates,
+            last_boot_time,
+            uptime_days,
+            disk_total_gb,
+            disk_free_gb,
+            compliance_status,
+            scan_source,
+            scanned_at
+        FROM asset_inventory
+        ORDER BY hostname
+        """
+    )
+
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return rows

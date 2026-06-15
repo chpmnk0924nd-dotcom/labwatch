@@ -23,3 +23,7 @@ security_reports/
 Thumbs.db
 .vscode/
 .idea/
+
+patchwatch/secrets/
+patchwatch/data/
+patchwatch/*.log

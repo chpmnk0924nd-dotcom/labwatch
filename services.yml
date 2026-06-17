@@ -125,6 +125,21 @@ services:
     port: 40000
     category: Storage  
 
+  - name: NAS NFS Storage
+    url: nfs://192.168.10.30:2049
+    host: 192.168.10.30
+    port: 2049
+    category: Storage
+
+  - name: Proxmox NAS Backup Mount
+    url: pvesm://nas-backup
+    host: 192.168.10.20
+    port: 22
+    category: Storage
+    check_type: proxmox_storage
+    storage_name: nas-backup
+    ssh_user: root
+
   - name: Switch Management
     url: http://192.168.10.102
     host: 192.168.10.102

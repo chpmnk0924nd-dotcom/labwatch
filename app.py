@@ -20,6 +20,9 @@ from db import (
     get_service_uptime,
     get_reliability_summary,
     get_asset_inventory,
+    get_restorewatch_assets,
+    get_restorewatch_history,
+    get_restorewatch_trends,
 )
 
 import socket
@@ -329,6 +332,44 @@ def check_service(service):
     return checked_service
 
 
+@app.route("/restorewatch")
+def restorewatch():
+    assets = get_restorewatch_assets()
+
+    total_guests = len(assets)
+    current_count = sum(
+        1 for asset in assets
+        if asset["protection_status"] == "Current"
+    )
+    stale_count = sum(
+        1 for asset in assets
+        if asset["protection_status"] == "Stale"
+    )
+    missing_count = sum(
+        1 for asset in assets
+        if asset["protection_status"] == "Missing"
+    )
+
+    protected_count = current_count + stale_count
+
+    coverage_percent = (
+        round((protected_count / total_guests) * 100, 2)
+        if total_guests
+        else 0
+    )
+
+    return render_template(
+        "restorewatch.html",
+        assets=assets,
+        total_guests=total_guests,
+        current_count=current_count,
+        stale_count=stale_count,
+        missing_count=missing_count,
+        protected_count=protected_count,
+        coverage_percent=coverage_percent,
+    )
+
+
 @app.route("/")
 def dashboard():
     services = load_services()
@@ -555,6 +596,96 @@ def assets():
         current_count=current_count,
         updates_count=updates_count,
         security_updates_count=security_updates_count,
+    )
+
+
+@app.route("/restorewatch/history")
+def restorewatch_history():
+    history = get_restorewatch_history(300)
+    trend_rows = get_restorewatch_trends(30)
+
+    history_batches = {}
+
+    for row in history:
+        batch_id = str(row["scan_batch_id"])
+
+        if batch_id not in history_batches:
+            history_batches[batch_id] = {
+                "scan_batch_id": batch_id,
+                "scanned_at": row["scanned_at"],
+                "assets": [],
+            }
+
+        history_batches[batch_id]["assets"].append(row)
+
+    grouped_history = list(history_batches.values())
+
+    for batch in grouped_history:
+        assets = batch["assets"]
+
+        batch["total_guests"] = len(assets)
+
+        batch["current_count"] = sum(
+            1
+            for asset in assets
+            if asset["protection_status"] == "Current"
+        )
+
+        batch["stale_count"] = sum(
+            1
+            for asset in assets
+            if asset["protection_status"] == "Stale"
+        )
+
+        batch["missing_count"] = sum(
+            1
+            for asset in assets
+            if asset["protection_status"] == "Missing"
+        )
+
+        protected_count = (
+            batch["current_count"]
+            + batch["stale_count"]
+        )
+
+        batch["coverage_percent"] = (
+            round(
+                protected_count
+                / batch["total_guests"]
+                * 100,
+                2,
+            )
+            if batch["total_guests"]
+            else 0
+        )
+
+    trend_labels = [
+        row["scanned_at"].strftime("%Y-%m-%d %H:%M")
+        for row in trend_rows
+    ]
+
+    trend_coverage = [
+        float(row["coverage_percent"] or 0)
+        for row in trend_rows
+    ]
+
+    trend_current = [
+        int(row["current_count"] or 0)
+        for row in trend_rows
+    ]
+
+    trend_missing = [
+        int(row["missing_count"] or 0)
+        for row in trend_rows
+    ]
+
+    return render_template(
+        "restorewatch_history.html",
+        history_batches=grouped_history,
+        trend_labels=trend_labels,
+        trend_coverage=trend_coverage,
+        trend_current=trend_current,
+        trend_missing=trend_missing,
     )
 
 

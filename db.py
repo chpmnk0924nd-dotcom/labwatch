@@ -170,6 +170,116 @@ def save_incident(service, old_status, new_status):
     except Exception as e:
         print(f"[DB ERROR] Could not save incident: {e}")
 
+def get_restorewatch_assets():
+    """Return RestoreWatch guest protection records as dictionaries."""
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    vm_id,
+                    guest_name,
+                    guest_type,
+                    guest_status,
+                    protection_status,
+                    latest_backup_file,
+                    latest_backup_created_at,
+                    latest_backup_size_gb,
+                    backup_age_days,
+                    storage_name,
+                    scanned_at
+                FROM restorewatch_assets
+                ORDER BY vm_id;
+                """
+            )
+
+            column_names = [
+                column_description[0]
+                for column_description in cursor.description
+            ]
+
+            return [
+                dict(zip(column_names, row))
+                for row in cursor.fetchall()
+            ]
+
+    finally:
+        connection.close()
+
+
+def get_restorewatch_trends(limit=30):
+    """Return one summarized trend record per RestoreWatch scan batch."""
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    scan_batch_id,
+                    MIN(scanned_at) AS scanned_at,
+                    COUNT(*) AS total_guests,
+                    COUNT(*) FILTER (
+                        WHERE protection_status = 'Current'
+                    ) AS current_count,
+                    COUNT(*) FILTER (
+                        WHERE protection_status = 'Stale'
+                    ) AS stale_count,
+                    COUNT(*) FILTER (
+                        WHERE protection_status = 'Missing'
+                    ) AS missing_count,
+                    ROUND(
+                        (
+                            COUNT(*) FILTER (
+                                WHERE protection_status IN (
+                                    'Current',
+                                    'Stale'
+                                )
+                            )::numeric
+                            / NULLIF(COUNT(*), 0)
+                        ) * 100,
+                        2
+                    ) AS coverage_percent,
+                    ROUND(
+                        (
+                            COUNT(*) FILTER (
+                                WHERE protection_status = 'Current'
+                            )::numeric
+                            / NULLIF(COUNT(*), 0)
+                        ) * 100,
+                        2
+                    ) AS current_percent
+                FROM restorewatch_history
+                GROUP BY scan_batch_id
+                ORDER BY MIN(scanned_at) DESC
+                LIMIT %s;
+                """,
+                (limit,),
+            )
+
+            column_names = [
+                description[0]
+                for description in cursor.description
+            ]
+
+            rows = [
+                dict(zip(column_names, row))
+                for row in cursor.fetchall()
+            ]
+
+            # Reverse so the oldest scan appears first on the chart.
+            rows.reverse()
+
+            return rows
+
+    finally:
+        connection.close()
+
+
 def get_recent_incidents(limit=50):
     """
     Get recent LabWatch incidents from PostgreSQL.
@@ -448,3 +558,47 @@ def get_asset_inventory():
     conn.close()
 
     return rows
+
+
+def get_restorewatch_history(limit=100):
+    """Return recent RestoreWatch history records."""
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    vm_id,
+                    guest_name,
+                    guest_type,
+                    guest_status,
+                    protection_status,
+                    latest_backup_file,
+                    latest_backup_created_at,
+                    latest_backup_size_gb,
+                    backup_age_days,
+                    storage_name,
+                    scan_batch_id,
+                    scanned_at
+                FROM restorewatch_history
+                ORDER BY scanned_at DESC, vm_id
+                LIMIT %s;
+                """,
+                (limit,),
+            )
+
+            column_names = [
+                description[0]
+                for description in cursor.description
+            ]
+
+            return [
+                dict(zip(column_names, row))
+                for row in cursor.fetchall()
+            ]
+
+    finally:
+        connection.close()

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>RestoreWatch History</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="page-container">
+
+        <nav class="nav-bar">
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-button"
+            >
+                🏠 Dashboard
+            </a>
+
+            <a
+                href="{{ url_for('history') }}"
+                class="nav-button"
+            >
+                📊 History
+            </a>
+
+            <a
+                href="{{ url_for('incidents') }}"
+                class="nav-button"
+            >
+                🚨 Incidents
+            </a>
+
+            <a
+                href="{{ url_for('security') }}"
+                class="nav-button"
+            >
+                🛡️ Security Watch
+            </a>
+
+            <a
+                href="{{ url_for('maintenance') }}"
+                class="nav-button"
+            >
+                🛠️ Maintenance
+            </a>
+
+            <a
+                href="{{ url_for('reliability') }}"
+                class="nav-button"
+            >
+                ☑ Reliability
+            </a>
+
+            <a
+                href="{{ url_for('backups') }}"
+                class="nav-button"
+            >
+                💾 Backups
+            </a>
+
+            <a
+                href="{{ url_for('assets') }}"
+                class="nav-button"
+            >
+                🖥️ Assets
+            </a>
+
+            <a
+                href="{{ url_for('restorewatch') }}"
+                class="nav-button"
+            >
+                ♻️ RestoreWatch
+            </a>
+        </nav>
+
+        <header class="page-header">
+            <h1>RestoreWatch History</h1>
+
+            <p>
+                Historical Proxmox backup-protection results collected
+                from RestoreWatch scan batches.
+            </p>
+
+            <a
+                href="{{ url_for('restorewatch') }}"
+                class="nav-button"
+            >
+                ← Back to RestoreWatch
+            </a>
+        </header>
+
+        <section class="restorewatch-chart-panel">
+    <div class="chart-heading">
+        <div>
+            <h2>Backup Protection Trend</h2>
+
+            <p>
+                Measures backup coverage improvements and declines
+                across RestoreWatch scan batches.
+            </p>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="restorewatchTrendChart"></canvas>
+    </div>
+
+    {% if trend_labels|length < 2 %}
+        <p class="chart-note">
+            More scan batches are needed to form a trend line.
+            The next scheduled scan will add another data point.
+        </p>
+    {% endif %}
+</section>
+
+        <main>
+            {% for batch in history_batches %}
+                <details
+                    class="restorewatch-batch"
+                    {% if loop.first %}open{% endif %}
+                >
+                    <summary class="batch-header">
+                        <div class="batch-title">
+                            <h2>
+                                Scan: {{ batch['scanned_at'] }}
+                            </h2>
+
+                            <p>
+                                Batch ID:
+                                <code>
+                                    {{ batch['scan_batch_id'] }}
+                                </code>
+                            </p>
+                        </div>
+
+                        <div class="batch-summary">
+                            <span class="status-badge">
+                                Total: {{ batch['total_guests'] }}
+                            </span>
+
+                            <span class="status-badge online">
+                                Current: {{ batch['current_count'] }}
+                            </span>
+
+                            <span class="status-badge warning">
+                                Stale: {{ batch['stale_count'] }}
+                            </span>
+
+                            <span class="status-badge offline">
+                                Missing: {{ batch['missing_count'] }}
+                            </span>
+
+                            <span class="status-badge">
+                                Coverage:
+                                {{ batch['coverage_percent'] }}%
+                            </span>
+                        </div>
+                    </summary>
+
+                    <div class="table-container">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>VM ID</th>
+                                    <th>Guest Name</th>
+                                    <th>Type</th>
+                                    <th>Guest Status</th>
+                                    <th>Protection</th>
+                                    <th>Backup Age</th>
+                                    <th>Backup Size</th>
+                                    <th>Latest Backup</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for row in batch['assets'] %}
+                                    {% set status_class =
+                                        'online'
+                                        if row['protection_status']
+                                            == 'Current'
+                                        else 'warning'
+                                        if row['protection_status']
+                                            == 'Stale'
+                                        else 'offline'
+                                    %}
+
+                                    <tr>
+                                        <td>
+                                            {{ row['vm_id'] }}
+                                        </td>
+
+                                        <td>
+                                            {{ row['guest_name'] }}
+                                        </td>
+
+                                        <td>
+                                            {{ row['guest_type'] }}
+                                        </td>
+
+                                        <td>
+                                            {{ row['guest_status'] }}
+                                        </td>
+
+                                        <td>
+                                            <span
+                                                class="status-badge {{ status_class }}"
+                                            >
+                                                {{ row['protection_status'] }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            {% if row['backup_age_days']
+                                                is not none %}
+                                                {{ row['backup_age_days'] }}
+                                                days
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {% if row['latest_backup_size_gb']
+                                                is not none %}
+                                                {{ row['latest_backup_size_gb'] }}
+                                                GB
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {{
+                                                row['latest_backup_file']
+                                                or 'None'
+                                            }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+
+            {% else %}
+                <section class="table-container">
+                    <p>
+                        No RestoreWatch history records were found.
+                    </p>
+                </section>
+            {% endfor %}
+        </main>
+
+    </div>
+
+<script>
+    const trendLabels = {{ trend_labels | tojson }};
+    const trendCoverage = {{ trend_coverage | tojson }};
+    const trendCurrent = {{ trend_current | tojson }};
+    const trendMissing = {{ trend_missing | tojson }};
+
+    const chartCanvas = document.getElementById(
+        "restorewatchTrendChart"
+    );
+
+    if (chartCanvas && trendLabels.length > 0) {
+        new Chart(chartCanvas, {
+            type: "line",
+
+            data: {
+                labels: trendLabels,
+
+                datasets: [
+                    {
+                        label: "Coverage %",
+                        data: trendCoverage,
+                        borderColor: "#00f5ff",
+                        backgroundColor: "rgba(0, 245, 255, 0.15)",
+                        borderWidth: 3,
+                        tension: 0.25,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        yAxisID: "percentageAxis"
+                    },
+                    {
+                        label: "Current Backups",
+                        data: trendCurrent,
+                        borderColor: "#22c55e",
+                        backgroundColor: "rgba(34, 197, 94, 0.15)",
+                        borderWidth: 2,
+                        tension: 0.25,
+                        fill: false,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        yAxisID: "guestAxis"
+                    },
+                    {
+                        label: "Missing Backups",
+                        data: trendMissing,
+                        borderColor: "#ef4444",
+                        backgroundColor: "rgba(239, 68, 68, 0.15)",
+                        borderWidth: 2,
+                        tension: 0.25,
+                        fill: false,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        yAxisID: "guestAxis"
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "#e5e7eb"
+                        }
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (
+                                    context.dataset.label === "Coverage %"
+                                ) {
+                                    return (
+                                        context.dataset.label
+                                        + ": "
+                                        + context.parsed.y
+                                        + "%"
+                                    );
+                                }
+
+                                return (
+                                    context.dataset.label
+                                    + ": "
+                                    + context.parsed.y
+                                    + " guests"
+                                );
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    x: {
+                        ticks: {
+                            color: "#cbd5e1",
+                            maxRotation: 45,
+                            minRotation: 0
+                        },
+
+                        grid: {
+                            color: "rgba(148, 163, 184, 0.12)"
+                        }
+                    },
+
+                    percentageAxis: {
+                        type: "linear",
+                        position: "left",
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
+
+                        title: {
+                            display: true,
+                            text: "Coverage Percentage",
+                            color: "#00f5ff"
+                        },
+
+                        ticks: {
+                            color: "#00f5ff",
+                            callback: function(value) {
+                                return value + "%";
+                            }
+                        },
+
+                        grid: {
+                            color: "rgba(148, 163, 184, 0.12)"
+                        }
+                    },
+
+                    guestAxis: {
+                        type: "linear",
+                        position: "right",
+                        beginAtZero: true,
+
+                        title: {
+                            display: true,
+                            text: "Number of Guests",
+                            color: "#e5e7eb"
+                        },
+
+                        ticks: {
+                            color: "#e5e7eb",
+                            precision: 0
+                        },
+
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
+```

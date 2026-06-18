@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RestoreWatch</title>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+<body>
+    <div class="page-container">
+        <div class="nav-bar">
+            <a href="{{ url_for('dashboard') }}" class="nav-button">
+                🏠 Dashboard
+            </a>
+            <a href="{{ url_for('history') }}" class="nav-button">
+                📊 History
+            </a>
+            <a href="{{ url_for('incidents') }}" class="nav-button">
+                🚨 Incidents
+            </a>
+            <a href="{{ url_for('security') }}" class="nav-button">
+                🛡️ Security Watch
+            </a>
+            <a href="{{ url_for('maintenance') }}" class="nav-button">
+                🛠️ Maintenance
+            </a>
+            <a href="{{ url_for('reliability') }}" class="nav-button">
+                ☑ Reliability
+            </a>
+            <a href="{{ url_for('backups') }}" class="nav-button">
+                💾 Backups
+            </a>
+            <a href="{{ url_for('assets') }}" class="nav-button">
+                🖥️ Assets
+            </a>
+            <a href="{{ url_for('restorewatch_history') }}" class="nav-button">
+                📜 View RestoreWatch History
+            </a>
+        </div>
+
+        <header class="page-header">
+            <h1>RestoreWatch</h1>
+            <p>
+                Proxmox backup coverage, backup age, and protection status
+                for all virtual machines and containers.
+            </p>
+        </header>
+
+        <section class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-number">{{ total_guests }}</div>
+                <div class="summary-label">Total Guests</div>
+            </div>
+
+            <div class="summary-card status-online">
+                <div class="summary-number">{{ current_count }}</div>
+                <div class="summary-label">Current Backups</div>
+            </div>
+
+            <div class="summary-card status-warning">
+                <div class="summary-number">{{ stale_count }}</div>
+                <div class="summary-label">Stale Backups</div>
+            </div>
+
+            <div class="summary-card status-offline">
+                <div class="summary-number">{{ missing_count }}</div>
+                <div class="summary-label">Missing Backups</div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-number">
+                    {{ coverage_percent }}%
+                </div>
+                <div class="summary-label">Backup Coverage</div>
+            </div>
+        </section>
+
+        <section class="asset-grid">
+            {% for asset in assets %}
+                {% set status_class =
+                    'online'
+                    if asset['protection_status'] == 'Current'
+                    else 'warning'
+                    if asset['protection_status'] == 'Stale'
+                    else 'offline'
+                %}
+
+                <article class="service-card {{ status_class }}">
+                    <div class="service-header">
+                        <h2>
+                            {{ asset['vm_id'] }} — {{ asset['guest_name'] }}
+                        </h2>
+
+                        <span class="status-badge {{ status_class }}">
+                            {{ asset['protection_status'] }}
+                        </span>
+                    </div>
+
+                    <p>
+                        <strong>Guest Type:</strong>
+                        {{ asset['guest_type'] }}
+                    </p>
+
+                    <p>
+                        <strong>Guest Status:</strong>
+                        {{ asset['guest_status'] }}
+                    </p>
+
+                    <p>
+                        <strong>Storage:</strong>
+                        {{ asset['storage_name'] or 'No backup' }}
+                    </p>
+
+                    <p>
+                        <strong>Latest Backup:</strong>
+                        {{ asset['latest_backup_file'] or 'None' }}
+                    </p>
+
+                    <p>
+                        <strong>Backup Created:</strong>
+                        {{ asset['latest_backup_created_at'] or 'N/A' }}
+                    </p>
+
+                    <p>
+                        <strong>Backup Size:</strong>
+                        {% if asset['latest_backup_size_gb'] is not none %}
+                            {{ asset['latest_backup_size_gb'] }} GB
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        <strong>Backup Age:</strong>
+                        {% if asset['backup_age_days'] is not none %}
+                            {{ asset['backup_age_days'] }} days
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        <strong>Last Scanned:</strong>
+                        {{ asset['scanned_at'] }}
+                    </p>
+                </article>
+            {% endfor %}
+        </section>
+    </div>
+</body>
+</html>

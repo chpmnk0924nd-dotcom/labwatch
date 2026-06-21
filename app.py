@@ -23,6 +23,9 @@ from db import (
     get_restorewatch_assets,
     get_restorewatch_history,
     get_restorewatch_trends,
+    get_identitywatch_users,
+    get_identitywatch_privileged_memberships,
+    get_identitywatch_history,
 )
 
 import socket
@@ -367,6 +370,37 @@ def restorewatch():
         missing_count=missing_count,
         protected_count=protected_count,
         coverage_percent=coverage_percent,
+    )
+
+
+
+@app.route("/identitywatch")
+def identitywatch():
+    users = get_identitywatch_users()
+    privileged_memberships = get_identitywatch_privileged_memberships()
+    history = get_identitywatch_history(30)
+
+    latest_scan = history[0] if history else None
+
+    total_users = len(users)
+    enabled_users = sum(1 for user in users if user["enabled"])
+    disabled_users = total_users - enabled_users
+    locked_users = sum(1 for user in users if user["locked_out"])
+    expired_passwords = sum(
+        1 for user in users if user["password_expired"]
+    )
+
+    return render_template(
+        "identitywatch.html",
+        users=users,
+        privileged_memberships=privileged_memberships,
+        history=history,
+        latest_scan=latest_scan,
+        total_users=total_users,
+        enabled_users=enabled_users,
+        disabled_users=disabled_users,
+        locked_users=locked_users,
+        expired_passwords=expired_passwords,
     )
 
 

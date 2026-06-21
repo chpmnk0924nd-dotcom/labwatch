@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IdentityWatch</title>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+<div class="page-container">
+
+    <div class="page-nav">
+        <a href="{{ url_for('dashboard') }}" class="nav-button">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('history') }}" class="nav-button">
+            History
+        </a>
+
+        <a href="{{ url_for('incidents') }}" class="nav-button">
+            Incidents
+        </a>
+
+        <a href="{{ url_for('security') }}" class="nav-button">
+            Security Watch
+        </a>
+
+        <a href="{{ url_for('maintenance') }}" class="nav-button">
+            Maintenance
+        </a>
+
+        <a href="{{ url_for('reliability') }}" class="nav-button">
+            Reliability
+        </a>
+
+        <a href="{{ url_for('backups') }}" class="nav-button">
+            Backups
+        </a>
+
+        <a href="{{ url_for('assets') }}" class="nav-button">
+            Assets
+        </a>
+
+        <a href="{{ url_for('restorewatch') }}" class="nav-button">
+            RestoreWatch
+        </a>
+    </div>
+
+    <header class="page-header">
+        <h1>IdentityWatch</h1>
+        <p>
+            Active Directory accounts, password status,
+            privileged memberships, and identity drift.
+        </p>
+    </header>
+
+    <section class="summary">
+        <div class="summary-card">
+            <div class="summary-number">{{ total_users }}</div>
+            <div class="summary-label">Total Users</div>
+        </div>
+
+        <div class="summary-card status-online">
+            <div class="summary-number">{{ enabled_users }}</div>
+            <div class="summary-label">Enabled Users</div>
+        </div>
+
+        <div class="summary-card status-warning">
+            <div class="summary-number">{{ disabled_users }}</div>
+            <div class="summary-label">Disabled Users</div>
+        </div>
+
+        <div class="summary-card status-offline">
+            <div class="summary-number">{{ locked_users }}</div>
+            <div class="summary-label">Locked Users</div>
+        </div>
+
+        <div class="summary-card status-offline">
+            <div class="summary-number">{{ expired_passwords }}</div>
+            <div class="summary-label">Expired Passwords</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-number">
+                {{ privileged_memberships | length }}
+            </div>
+            <div class="summary-label">Privileged Memberships</div>
+        </div>
+    </section>
+
+    {% if latest_scan %}
+    <section class="asset-grid">
+        <article class="service-card">
+            <div class="service-header">
+                <h2>Latest Identity Scan</h2>
+
+                {% if latest_scan["drift_detected"] %}
+                    <span class="status-badge status-offline">
+                        Drift Detected
+                    </span>
+                {% else %}
+                    <span class="status-badge status-online">
+                        Baseline Match
+                    </span>
+                {% endif %}
+            </div>
+
+            <p>
+                <strong>Source:</strong>
+                {{ latest_scan["source_host"] }}
+            </p>
+
+            <p>
+                <strong>Domain:</strong>
+                {{ latest_scan["domain_fqdn"] or "N/A" }}
+            </p>
+
+            <p>
+                <strong>Changes:</strong>
+                {{ latest_scan["change_count"] }}
+            </p>
+
+            <p>
+                <strong>Scanned:</strong>
+                {{ latest_scan["scanned_at"] }}
+            </p>
+        </article>
+    </section>
+    {% endif %}
+
+    <header class="page-header">
+        <h2>Directory Users</h2>
+    </header>
+
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Display Name</th>
+                <th>Enabled</th>
+                <th>Locked</th>
+                <th>Password Expired</th>
+                <th>Last Logon</th>
+                <th>Last Scanned</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user["username"] }}</td>
+                <td>{{ user["display_name"] or "N/A" }}</td>
+                <td>{{ "Yes" if user["enabled"] else "No" }}</td>
+                <td>{{ "Yes" if user["locked_out"] else "No" }}</td>
+                <td>
+                    {{ "Yes" if user["password_expired"] else "No" }}
+                </td>
+                <td>{{ user["last_logon_date"] or "Never" }}</td>
+                <td>{{ user["scanned_at"] }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">No IdentityWatch users found.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <header class="page-header">
+        <h2>Privileged Group Memberships</h2>
+    </header>
+
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>Group</th>
+                <th>Username</th>
+                <th>Object Class</th>
+                <th>Source Host</th>
+                <th>Last Scanned</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for membership in privileged_memberships %}
+            <tr>
+                <td>{{ membership["group_name"] }}</td>
+                <td>{{ membership["username"] }}</td>
+                <td>{{ membership["object_class"] or "N/A" }}</td>
+                <td>{{ membership["source_host"] }}</td>
+                <td>{{ membership["scanned_at"] }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">
+                    No privileged memberships found.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <header class="page-header">
+        <h2>Recent IdentityWatch History</h2>
+    </header>
+
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>Scanned</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Users</th>
+                <th>Changes</th>
+                <th>Critical</th>
+                <th>High</th>
+                <th>Medium</th>
+                <th>Low</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for scan in history %}
+            <tr>
+                <td>{{ scan["scanned_at"] }}</td>
+                <td>{{ scan["source_host"] }}</td>
+                <td>{{ scan["drift_status"] }}</td>
+                <td>{{ scan["total_users"] }}</td>
+                <td>{{ scan["change_count"] }}</td>
+                <td>{{ scan["critical_count"] }}</td>
+                <td>{{ scan["high_count"] }}</td>
+                <td>{{ scan["medium_count"] }}</td>
+                <td>{{ scan["low_count"] }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="9">
+                    No IdentityWatch history found.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>
+

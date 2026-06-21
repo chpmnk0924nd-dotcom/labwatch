@@ -602,3 +602,123 @@ def get_restorewatch_history(limit=100):
 
     finally:
         connection.close()
+def get_identitywatch_users():
+    """Return current IdentityWatch user records as dictionaries."""
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    asset_id,
+                    source_host,
+                    domain_fqdn,
+                    username,
+                    display_name,
+                    enabled,
+                    locked_out,
+                    password_expired,
+                    password_last_set,
+                    last_logon_date,
+                    account_created_at,
+                    scanned_at
+                FROM identitywatch_users
+                ORDER BY enabled DESC, username;
+                """
+            )
+
+            column_names = [
+                description[0]
+                for description in cursor.description
+            ]
+
+            return [
+                dict(zip(column_names, row))
+                for row in cursor.fetchall()
+            ]
+
+    finally:
+        connection.close()
+
+def get_identitywatch_privileged_memberships():
+    """Return current IdentityWatch privileged memberships."""
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    asset_id,
+                    source_host,
+                    group_name,
+                    username,
+                    object_class,
+                    scanned_at
+                FROM identitywatch_privileged_memberships
+                ORDER BY group_name, username;
+                """
+            )
+
+            column_names = [
+                description[0]
+                for description in cursor.description
+            ]
+
+            return [
+                dict(zip(column_names, row))
+                for row in cursor.fetchall()
+            ]
+
+    finally:
+        connection.close()
+
+def get_identitywatch_history(limit=100):
+    """Return recent IdentityWatch scan-history records."""
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    asset_id,
+                    source_host,
+                    domain_fqdn,
+                    total_users,
+                    enabled_users,
+                    disabled_users,
+                    locked_users,
+                    expired_passwords,
+                    drift_detected,
+                    drift_status,
+                    change_count,
+                    critical_count,
+                    high_count,
+                    medium_count,
+                    low_count,
+                    scan_batch_id,
+                    scanned_at
+                FROM identitywatch_history
+                ORDER BY scanned_at DESC
+                LIMIT %s;
+                """,
+                (limit,),
+            )
+
+            column_names = [
+                description[0]
+                for description in cursor.description
+            ]
+
+            return [
+                dict(zip(column_names, row))
+                for row in cursor.fetchall()
+            ]
+
+    finally:
+        connection.close()

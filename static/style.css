@@ -420,3 +420,70 @@ header p {
     color: #fbbf24;
     font-size: 0.95rem;
 }
+
+.live-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    margin: 10px 0 16px;
+    color: #bbf7d0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.live-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow:
+        0 0 10px #22c55e,
+        0 0 20px rgba(34, 197, 94, 0.7);
+    animation: liveBlink 1.5s infinite;
+}
+
+@keyframes liveBlink {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.45;
+        transform: scale(0.7);
+    }
+}
+
+.neon-border {
+    position: relative;
+    border: 1px solid #1e90ff;
+    overflow: hidden;
+}
+
+.neon-border::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #00e5ff,
+        transparent
+    );
+    animation: borderSweep 4s linear infinite;
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+@keyframes borderSweep {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
